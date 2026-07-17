@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yejin Park // Pixel Portfolio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0a14;
+    --panel:#14141f;
+    --panel-2:#1b1b2b;
+    --fg:#f1f0ff;
+    --muted:#8a87b0;
+    --cyan:#00e5ff;
+    --pink:#ff4d8d;
+    --yellow:#ffd54a;
+    --purple:#b085ff;
+    --green:#6dffb0;
+    --notch:10px;
+  }
+
+  *{ box-sizing:border-box; }
+
+  body{
+    margin:0;
+    background:
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 1px, transparent 1px, transparent 3px),
+      radial-gradient(circle at 50% 0%, #14142a 0%, var(--bg) 55%);
+    color:var(--fg);
+    font-family:'VT323', monospace;
+    font-size:20px;
+    min-height:100vh;
+    image-rendering:pixelated;
+  }
+
+  ::selection{ background:var(--pink); color:#0a0a14; }
+
+  /* ---------- pixel panel: stepped corners, the site's signature shape ---------- */
+  .pixel-panel{
+    background:var(--panel);
+    border:3px solid var(--fg);
+    clip-path: polygon(
+      0 var(--notch), var(--notch) var(--notch), var(--notch) 0,
+      calc(100% - var(--notch)) 0, calc(100% - var(--notch)) var(--notch), 100% var(--notch),
+      100% calc(100% - var(--notch)), calc(100% - var(--notch)) calc(100% - var(--notch)), calc(100% - var(--notch)) 100%,
+      var(--notch) 100%, var(--notch) calc(100% - var(--notch)), 0 calc(100% - var(--notch))
+    );
+    position:relative;
+  }
+  .pixel-panel::after{
+    content:"";
+    position:absolute; inset:0;
+    box-shadow: 6px 6px 0 0 rgba(0,0,0,0.55);
+    clip-path:inherit;
+    pointer-events:none;
+    z-index:-1;
+  }
+
+  .pixel-btn{
+    font-family:'Press Start 2P', monospace;
+    font-size:12px;
+    color:var(--bg);
+    background:var(--cyan);
+    border:3px solid var(--fg);
+    padding:12px 16px;
+    cursor:pointer;
+    clip-path: polygon(
+      0 6px, 6px 6px, 6px 0, calc(100% - 6px) 0, calc(100% - 6px) 6px, 100% 6px,
+      100% calc(100% - 6px), calc(100% - 6px) calc(100% - 6px), calc(100% - 6px) 100%,
+      6px 100%, 6px calc(100% - 6px), 0 calc(100% - 6px)
+    );
+    transition:transform .08s ease, background .12s ease;
+  }
+  .pixel-btn:hover{ transform:translate(-2px,-2px); }
+  .pixel-btn:active{ transform:translate(1px,1px); }
+  .pixel-btn.active{ background:var(--pink); }
+
+  header{
+    text-align:center;
+    padding:56px 20px 28px;
+  }
+  .eyebrow{
+    font-family:'Press Start 2P';
+    font-size:11px;
+    color:var(--muted);
+    letter-spacing:2px;
+  }
+  h1{
+    font-family:'Press Start 2P';
+    font-size:clamp(22px, 5vw, 40px);
+    margin:14px 0 10px;
+    color:var(--fg);
+    text-shadow: 3px 3px 0 var(--pink), 6px 6px 0 var(--purple);
+    line-height:1.4;
+  }
+  .cursor{
+    display:inline-block;
+    width:.5em; margin-left:6px;
+    background:var(--green);
+    animation: blink 1s steps(1) infinite;
+  }
+  @keyframes blink{ 50%{ opacity:0; } }
+  .tagline{
+    color:var(--muted);
+    font-size:22px;
+    max-width:520px;
+    margin:0 auto;
+  }
+
+  nav.tabs{
+    display:flex;
+    justify-content:center;
+    gap:14px;
+    flex-wrap:wrap;
+    padding:8px 20px 40px;
+  }
+
+  main{ max-width:1100px; margin:0 auto; padding:0 24px 80px; }
+  .tab-panel{ display:none; }
+  .tab-panel.active{ display:block; animation:fadein .25s ease; }
+  @keyframes fadein{ from{ opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;} }
+
+  .section-title{
+    font-family:'Press Start 2P';
+    font-size:16px;
+    color:var(--yellow);
+    margin:0 0 24px;
+    text-align:center;
+  }
+
+  /* ---------- About ---------- */
+  .about-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(230px, 1fr));
+    gap:22px;
+  }
+  .about-card{ padding:22px; text-align:center; }
+  .about-card canvas{ image-rendering:pixelated; margin-bottom:14px; }
+  .about-label{
+    font-family:'Press Start 2P';
+    font-size:10px;
+    color:var(--cyan);
+    margin-bottom:10px;
+    letter-spacing:1px;
+  }
+  .about-value{ font-size:26px; line-height:1.35; }
+  .about-value.big{ font-size:30px; color:var(--fg); }
+  .badge{
+    display:inline-block;
+    font-family:'Press Start 2P';
+    font-size:14px;
+    color:var(--bg);
+    background:var(--purple);
+    padding:6px 10px;
+    margin-top:6px;
+  }
+
+  /* ---------- Flip cards (Hobbies + p5.js) ---------- */
+  .card-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(230px, 1fr));
+    gap:22px;
+  }
+  .flip-card{
+    perspective:1000px;
+    height:270px;
+    cursor:pointer;
+  }
+  .flip-card-inner{
+    position:relative;
+    width:100%; height:100%;
+    transition:transform .5s;
+    transform-style:preserve-3d;
+  }
+  .flip-card.flipped .flip-card-inner{ transform:rotateY(180deg); }
+  .flip-face{
+    position:absolute; inset:0;
+    backface-visibility:hidden;
+    padding:18px;
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    text-align:center;
+  }
+  .flip-front canvas{ image-rendering:pixelated; margin-bottom:10px; }
+  .flip-front h3{
+    font-family:'Press Start 2P';
+    font-size:13px;
+    color:var(--fg);
+    margin:6px 0 4px;
+  }
+  .flip-front span.hint{ color:var(--muted); font-size:16px; }
+  .flip-back{
+    transform:rotateY(180deg);
+    background:var(--panel-2);
+    font-size:19px;
+    line-height:1.4;
+    color:var(--fg);
+    overflow-y:auto;
+  }
+  .flip-back .tag{ color:var(--green); }
+
+  /* ---------- p5.js placeholder area ---------- */
+  .p5-front .lecture-num{
+    font-family:'Press Start 2P';
+    font-size:26px;
+    color:var(--yellow);
+  }
+  .p5-result-slot{
+    width:100%; height:100%;
+    display:flex; align-items:center; justify-content:center;
+    flex-direction:column;
+    gap:8px;
+    background:
+      repeating-conic-gradient(#20202f 0% 25%, #17172420 0% 50%) 50% / 16px 16px;
+    border:2px dashed var(--muted);
+  }
+  .p5-result-slot img, .p5-result-slot canvas{ max-width:100%; max-height:100%; }
+  .p5-result-slot .placeholder-text{ color:var(--muted); font-size:16px; padding:0 12px; }
+
+  footer{
+    text-align:center;
+    padding:30px 20px 60px;
+    color:var(--muted);
+    font-size:16px;
+  }
+  footer .eyebrow{ display:block; margin-bottom:6px; }
+
+  @media (max-width:520px){
+    .flip-card{ height:230px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">// ABOUT_ME.EXE</div>
+  <h1>YEJIN PARK<span class="cursor">&nbsp;</span></h1>
+  <p class="tagline">Computer science student who codes by day, plays bass by night, and mains Yuumi in between.</p>
+</header>
+
+<nav class="tabs">
+  <button class="pixel-btn active" data-tab="about">ABOUT ME</button>
+  <button class="pixel-btn" data-tab="hobbies">HOBBIES</button>
+  <button class="pixel-btn" data-tab="p5works">P5.JS WORKS</button>
+</nav>
+
+<main>
+
+  <!-- ================= ABOUT ================= -->
+  <section id="about" class="tab-panel active">
+    <h2 class="section-title">// PLAYER PROFILE</h2>
+    <div class="about-grid">
+
+      <div class="about-card pixel-panel">
+        <div class="about-label">NAME</div>
+        <div class="about-value big">Yejin Park</div>
+      </div>
+
+      <div class="about-card pixel-panel">
+        <div class="about-label">MAJOR</div>
+        <canvas id="icon-computer" width="12" height="12" style="width:96px;height:96px;"></canvas>
+        <div class="about-value">Computer Science</div>
+      </div>
+
+      <div class="about-card pixel-panel">
+        <div class="about-label">MBTI</div>
+        <div class="badge">INTP</div>
+      </div>
+
+      <div class="about-card pixel-panel">
+        <div class="about-label">FAMILY</div>
+        <div class="about-value">Has a younger brother,<br>3 years my junior</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= HOBBIES ================= -->
+  <section id="hobbies" class="tab-panel">
+    <h2 class="section-title">// SIDE QUESTS</h2>
+    <div class="card-grid">
+
+      <div class="flip-card">
+        <div class="flip-card-inner">
+          <div class="flip-face flip-front pixel-panel">
+            <canvas class="hobby-icon" data-icon="bass" width="12" height="12" style="width:88px;height:88px;"></canvas>
+            <h3>BASS GUITAR</h3>
+            <span class="hint">tap to reveal</span>
+          </div>
+          <div class="flip-face flip-back pixel-panel">
+            Member of Sejong University's band club, <span class="tag">"Moobung."</span><br><br>
+            Started playing at church — <span class="tag">15 years</span> and still going strong.
+          </div>
+        </div>
+      </div>
+
+      <div class="flip-card">
+        <div class="flip-card-inner">
+          <div class="flip-face flip-front pixel-panel">
+            <canvas class="hobby-icon" data-icon="sax" width="12" height="12" style="width:88px;height:88px;"></canvas>
+            <h3>SAXOPHONE</h3>
+            <span class="hint">tap to reveal</span>
+          </div>
+          <div class="flip-face flip-back pixel-panel">
+            Just getting started — <span class="tag">3 months in!</span><br><br>
+            Picked it up after watching Jason Lee play, and I'm a huge <span class="tag">NMIXX</span> fan.
+          </div>
+        </div>
+      </div>
+
+      <div class="flip-card">
+        <div class="flip-card-inner">
+          <div class="flip-face flip-front pixel-panel">
+            <canvas class="hobby-icon" data-icon="cat" width="12" height="12" style="width:88px;height:88px;"></canvas>
+            <h3>LEAGUE OF LEGENDS</h3>
+            <span class="hint">tap to reveal</span>
+          </div>
+          <div class="flip-face flip-back pixel-panel">
+            Eternal Silver who finally climbed to <span class="tag">Emerald.</span><br><br>
+            One-trick Yuumi with <span class="tag">3,000,000</span> mastery points.<br>
+            In-game name: <span class="tag">"Dust Cat"</span> — eat my dust. 🐾
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= P5.JS WORKS ================= -->
+  <section id="p5works" class="tab-panel">
+    <h2 class="section-title">// CREATIVE CODING LOG (L1&ndash;L7)</h2>
+    <div class="card-grid" id="p5-grid">
+      <!-- generated by JS below -->
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <span class="eyebrow">// EOF</span>
+  Built pixel by pixel with p5.js, HTML &amp; CSS.
+</footer>
+
+<script>
+/* =========================================================
+   TAB SWITCHING
+========================================================= */
+document.querySelectorAll('.pixel-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.pixel-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab).classList.add('active');
+  });
+});
+
+/* =========================================================
+   FLIP CARDS (event delegation so it also works for
+   the p5.js cards generated dynamically below)
+========================================================= */
+document.addEventListener('click', (e)=>{
+  const card = e.target.closest('.flip-card');
+  if(card) card.classList.toggle('flipped');
+});
+
+/* =========================================================
+   PIXEL ART ICONS
+   Each icon is a tiny grid of characters. '.' = transparent,
+   any other character is looked up in PALETTE below.
+   Drawn onto a 12x12 <canvas> with pixelated scaling, so it
+   stays crisp at any size (no external image files needed).
+========================================================= */
+const PALETTE = {
+  k:'#f1f0ff', // outline / light
+  c:'#00e5ff', // screen cyan
+  n:'#caa06e', // guitar neck
+  b:'#ff9f43', // guitar body
+  g:'#ffd54a', // sax body
+  p:'#c9a8ff', // cat fur
+  d:'#241b3a'  // dark detail
+};
+
+const ICONS = {
+  computer:[
+    '............',
+    '..kkkkkkkk..',
+    '.kccccccck.',
+    '.kccccccck.',
+    '.kccccccck.',
+    '.kccccccck.',
+    '.kccccccck.',
+    '.kkkkkkkkk.',
+    '...kkkkkk...',
+    '..kkkkkkkk..',
+    '.kkkkkkkkkk.',
+    '............'
+  ],
+  bass:[
+    '.....kk.....',
+    '.....kk.....',
+    '.....nn.....',
+    '.....nn.....',
+    '.....nn.....',
+    '....knnk....',
+    '...kbbbbk...',
+    '..kbbbbbbk..',
+    '.kbbbbbbbbk.',
+    '.kbb....bbk.',
+    '..kkkkkkkk..',
+    '............'
+  ],
+  sax:[
+    '....kk......',
+    '....kg......',
+    '....kg......',
+    '....kg......',
+    '....kg......',
+    '....kg......',
+    '....kgk.....',
+    '....kgkk....',
+    '....kggkk...',
+    '....kgggkk..',
+    '....kkggkk..',
+    '.....kkkk...'
+  ],
+  cat:[
+    '...kkkkkk...',
+    '..kppppppk..',
+    '.kppppppppk.',
+    'kppdppdppppk',
+    'kppppppppppk',
+    'kpp.kk.kkppk',
+    '.kppppppppk.',
+    '..kppppppk..',
+    '...kkkkkk...',
+    '............',
+    '............',
+    '............'
+  ]
+};
+
+function drawPixelIcon(canvas, grid){
+  const ctx = canvas.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
+  grid.forEach((row, y)=>{
+    [...row].forEach((ch, x)=>{
+      if(ch === '.' ) return;
+      ctx.fillStyle = PALETTE[ch] || '#f1f0ff';
+      ctx.fillRect(x, y, 1, 1);
+    });
+  });
+}
+
+drawPixelIcon(document.getElementById('icon-computer'), ICONS.computer);
+document.querySelectorAll('.hobby-icon').forEach(c=>{
+  drawPixelIcon(c, ICONS[c.dataset.icon]);
+});
+
+/* =========================================================
+   P5.JS WORKS TAB — L1 through L7
+   Each card flips to a "result slot". Right now the slot is
+   an empty placeholder. To add your real results:
+
+   OPTION A — screenshot:
+     Replace the placeholder <div class="p5-result-slot"> ...
+     </div> for that lecture with:
+       <img src="your-screenshot.png" alt="L1 result">
+
+   OPTION B — a live, running sketch:
+     1) Add this once in <head>:
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"><\/script>
+     2) Give the result slot an id, e.g. id="p5-mount-1"
+     3) Write your sketch in INSTANCE MODE so it doesn't
+        collide with the other lectures, e.g.:
+
+        new p5(function(sk){
+          sk.setup = function(){ sk.createCanvas(200,200).parent('p5-mount-1'); };
+          sk.draw  = function(){ sk.background(20); sk.ellipse(sk.mouseX, sk.mouseY, 20); };
+        });
+
+   Send over your code or screenshots for L1-L7 and this can
+   be wired in directly.
+========================================================= */
+const LECTURES = [
+  {n:1, title:'Shapes & Coordinates'},
+  {n:2, title:'Variables & Motion'},
+  {n:3, title:'Conditionals'},
+  {n:4, title:'Loops & Arrays'},
+  {n:5, title:'Functions & Objects'},
+  {n:6, title:'Interaction (mouse/key)'},
+  {n:7, title:'Images & Final Piece'}
+];
+
+const grid = document.getElementById('p5-grid');
+LECTURES.forEach(lec=>{
+  const card = document.createElement('div');
+  card.className = 'flip-card';
+  card.innerHTML = `
+    <div class="flip-card-inner">
+      <div class="flip-face flip-front p5-front pixel-panel">
+        <div class="lecture-num">L${lec.n}</div>
+        <h3>${lec.title}</h3>
+        <span class="hint">tap to view result</span>
+      </div>
+      <div class="flip-face flip-back pixel-panel" style="padding:0;">
+        <div class="p5-result-slot" id="p5-mount-${lec.n}">
+          <div class="placeholder-text">Add L${lec.n} screenshot or live sketch here</div>
+        </div>
+      </div>
+    </div>
+  `;
+  grid.appendChild(card);
+});
+</script>
+
+</body>
+</html>
